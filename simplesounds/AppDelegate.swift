@@ -12,10 +12,22 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    
+    static func groupDefaults() -> UserDefaults {
+        let defaults = UserDefaults.init(suiteName: "group.com.simplesounds.share")
+        return defaults!
+    }
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        UINavigationBar.appearance().barTintColor = UIColor.black
+        UINavigationBar.appearance().tintColor = UIColor.white
+        UINavigationBar.appearance().titleTextAttributes = [NSAttributedStringKey.foregroundColor:UIColor.white]
+
+        
+        setupInitial()
+        
         return true
     }
 
@@ -39,6 +51,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+    
+    func setupInitial() {
+        if let _ = AppDelegate.groupDefaults().string(forKey: "0") {
+            print("already initialized")
+        } else {
+            AppDelegate.groupDefaults().set("shame", forKey: "0")
+            AppDelegate.groupDefaults().set("dilly2", forKey: "1")
+            copyFromBundle(filename: "shame.mp3")
+            copyFromBundle(filename: "dilly2.mp3")
+        }
+    }
+    
+    func copyFromBundle(filename: String) {
+        let fm = FileManager.default
+        let documentUrl = fm.groupDirectory
+        let fileBundleUrl = Bundle.main.resourceURL?.appendingPathComponent(filename)
+        
+        if fm.fileExists(atPath: (fileBundleUrl?.path)!) {
+            let fileDocumentUrl = documentUrl.appendingPathComponent(filename)
+            
+            do {
+                if !(fm.fileExists(atPath: fileDocumentUrl.path)) {
+                    try fm.copyItem(at: fileBundleUrl!, to: fileDocumentUrl)
+                }
+            } catch let error as NSError {
+                print("\(error.debugDescription)")
+            }
+        } else {
+            print("\(filename) does not exist in bundle")
+        }
+        
     }
 
 
