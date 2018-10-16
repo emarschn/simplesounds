@@ -22,6 +22,12 @@ class TodayViewController: UIViewController, NCWidgetProviding {
         
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        do {
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+        } catch {
+            print("Setting category to AVAudioSessionCategoryPlayback failed.")
+        }
 
         self.dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.simplesounds.share")
     }

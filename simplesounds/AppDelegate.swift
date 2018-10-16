@@ -7,9 +7,12 @@
 //
 
 import UIKit
+import AVFoundation
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    public static var highlightTag: Int = -1
 
     var window: UIWindow?
     
@@ -27,6 +30,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         
         setupInitial()
+        
+        do {
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+        } catch {
+            print("Setting category to AVAudioSessionCategoryPlayback failed.")
+        }
         
         return true
     }

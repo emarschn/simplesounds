@@ -103,6 +103,9 @@ class ViewController: UIViewController {
             } else {
                 but.backgroundColor = colorForPage(page: page + 1)
             }
+            if (count == AppDelegate.highlightTag) {
+                but.backgroundColor = colorForPage(page: page)
+            }
             but.setTitleColor(UIColor.white, for: .normal)
             
             resetButton(but: but)
@@ -174,7 +177,6 @@ class ViewController: UIViewController {
     @IBAction func swipePrev() {
         if (page > 0) {
             self.navigationController?.popViewController(animated: true);
-            setupChevrons()
         }
     }
     
@@ -183,7 +185,6 @@ class ViewController: UIViewController {
         if let vc = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController {
             vc.page = nextPage
             self.navigationController?.pushViewController(vc, animated: true)
-            setupChevrons()
         }
     }
     
@@ -221,8 +222,25 @@ class ViewController: UIViewController {
             let translation = gesture.translation(in: self.view)
             v.center = CGPoint(x: v.center.x + translation.x, y: v.center.y + translation.y)
             gesture.setTranslation(CGPoint.zero, in: self.view)
+            //print("\(v.center)")
         }
         if gesture.state == .ended {
+            let translation = gesture.translation(in: self.view)
+            v.center = CGPoint(x: v.center.x + translation.x, y: v.center.y + translation.y)
+            if (v.center.x < 16 && page > 0) {
+                self.move(tag: v.tag, page: page - 1, last: true)
+                self.swipePrev()
+                editTapped(sender: UIBarButtonItem())
+                setupButtons()
+                return
+            } else if (v.center.x > self.view.frame.size.width - 16) {
+                self.move(tag: v.tag, page: page + 1, last: false)
+                self.swipeNext()
+                editTapped(sender: UIBarButtonItem())
+                setupButtons()
+                return
+            }
+            
             var moved = false
             var count = 0;
             for but in buts {
@@ -258,6 +276,18 @@ class ViewController: UIViewController {
         let frame2 = vstackview.convert(frame, to: self.view)
         //print("\(frame2)")
         return frame2
+    }
+    
+    func move(tag: Int, page: Int, last: Bool) {
+        var replaceTag = String(8 * (page + 1))
+        if (!last) {
+            replaceTag = String((8 + 1) * (page))
+        }
+        let fromStr = AppDelegate.groupDefaults().string(forKey: String(tag)) ?? String(tag)
+        let toStr = AppDelegate.groupDefaults().string(forKey: replaceTag) ?? replaceTag
+        AppDelegate.groupDefaults().set(fromStr, forKey: replaceTag)
+        AppDelegate.groupDefaults().set(toStr, forKey: String(tag))
+        AppDelegate.highlightTag = tag
     }
     
     func delete(tag: Int) {
