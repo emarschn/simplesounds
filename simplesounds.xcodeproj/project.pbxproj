@@ -30,6 +30,7 @@
 		819031841F7CC13F00EEE396 /* shame.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 819031831F7CBFE800EEE396 /* shame.mp3 */; };
 		81A465891FEAE29D001A590A /* SFAudioWaveformHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A465881FEAE29D001A590A /* SFAudioWaveformHelper.swift */; };
 		81A4658A1FEAEDA6001A590A /* SFAudioWaveformHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A465881FEAE29D001A590A /* SFAudioWaveformHelper.swift */; };
+		81BC88372176E643006D9E92 /* UIButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BC88362176E643006D9E92 /* UIButton.swift */; };
 		81EAD1561FD6150C000DBF00 /* dilly2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 81EAD1551FD6150C000DBF00 /* dilly2.mp3 */; };
 /* End PBXBuildFile section */
 
@@ -89,6 +90,7 @@
 		8190317D1F7CBF3C00EEE396 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		819031831F7CBFE800EEE396 /* shame.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = shame.mp3; sourceTree = "<group>"; };
 		81A465881FEAE29D001A590A /* SFAudioWaveformHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SFAudioWaveformHelper.swift; sourceTree = "<group>"; };
+		81BC88362176E643006D9E92 /* UIButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIButton.swift; sourceTree = "<group>"; };
 		81EAD1551FD6150C000DBF00 /* dilly2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = dilly2.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -123,6 +125,7 @@
 			children = (
 				8114D37C217593860014591B /* UIColor.swift */,
 				8114D380217595C20014591B /* FileManager.swift */,
+				81BC88362176E643006D9E92 /* UIButton.swift */,
 			);
 			path = extensions;
 			sourceTree = "<group>";
@@ -384,6 +387,7 @@
 				8114D37D217593860014591B /* UIColor.swift in Sources */,
 				819031741F7CBF3C00EEE396 /* ViewController.swift in Sources */,
 				819031721F7CBF3C00EEE396 /* AppDelegate.swift in Sources */,
+				81BC88372176E643006D9E92 /* UIButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
