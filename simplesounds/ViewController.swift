@@ -47,32 +47,22 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
     
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        self.buts = [button0, button1, button2, button3, button4, button5, button6, button7, button8]
-        var count = 0 + (PER_PAGE * page)
-        for but in buts {
-            but.tag = count
-            count = count + 1
-            but.layer.borderWidth = 1.0
-            but.layer.borderColor = UIColor.black.cgColor
-            but.titleLabel?.lineBreakMode = .byWordWrapping
-            but.titleLabel?.textAlignment = .center
-        }
-        
         setupNav()
         setupView()
         setupButtons()
         setupChevrons()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        renderButtons()
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        handleAnimations()
+        handleColorChangeAnimation()
     }
     
     func setupNav() {
@@ -108,6 +98,23 @@ class ViewController: UIViewController {
     }
     
     func setupButtons() {
+        self.buts = [button0, button1, button2, button3, button4, button5, button6, button7, button8]
+        var count = (PER_PAGE * page)
+        for but in buts {
+            but.tag = count
+            count = count + 1
+            but.layer.borderWidth = 1.0
+            but.layer.borderColor = UIColor.black.cgColor
+            but.titleLabel?.lineBreakMode = .byWordWrapping
+            but.titleLabel?.textAlignment = .center
+        }
+    }
+    
+    func setupChevrons() {
+        leftButton.isHidden = page == 0 ? true : false
+    }
+    
+    func renderButtons() {
         var count = 0 + (PER_PAGE * page)
         for but in buts {
             let str = AppDelegate.groupDefaults().string(forKey: String(count)) ?? String(count)
@@ -157,7 +164,7 @@ class ViewController: UIViewController {
         }
     }
     
-    func handleAnimations() {
+    func handleColorChangeAnimation() {
         if let colorChanges = ViewController.colorChanges {
             for colorChange in colorChanges {
                 for but in buts {
@@ -175,14 +182,10 @@ class ViewController: UIViewController {
         }
     }
     
-    func setupChevrons() {
-        leftButton.isHidden = page == 0 ? true : false
-    }
-    
     @objc func editTapped(sender: UIBarButtonItem) {
         isEditing = !isEditing
         setupNav()
-        setupButtons()
+        renderButtons()
     }
     
     func resetButton(but: UIButton) {
@@ -222,9 +225,8 @@ class ViewController: UIViewController {
     }
     
     @IBAction func swipeNext() {
-        let nextPage = page + 1;
         if let vc = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController {
-            vc.page = nextPage
+            vc.page = page + 1
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }
@@ -246,7 +248,7 @@ class ViewController: UIViewController {
             controller.addAction(deleteAction)
             controller.addAction(cancelAction)
             self.navigationController!.present(controller, animated: true) {
-                print("presented")
+                //
             }
         }
     }
@@ -284,14 +286,14 @@ class ViewController: UIViewController {
                 self.swipePrev()
                 editTapped(sender: UIBarButtonItem())
                 v.center = startCenter
-                setupButtons()
+                renderButtons()
                 return
             } else if (v.center.x > self.view.frame.size.width - 16) {
                 self.move(tag: v.tag, page: page + 1, last: false)
                 self.swipeNext()
                 editTapped(sender: UIBarButtonItem())
                 v.center = startCenter
-                setupButtons()
+                renderButtons()
                 return
             }
             
@@ -330,8 +332,8 @@ class ViewController: UIViewController {
                 count = count + 1;
             }
             v.center = startCenter
-            setupButtons()
-            handleAnimations()
+            renderButtons()
+            handleColorChangeAnimation()
             if (moved) {
                 impact.impactOccurred()
             }
@@ -368,7 +370,7 @@ class ViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "Yes", style: .destructive) { action in
             //TODO delete file??
             AppDelegate.groupDefaults().set(String(tag), forKey: String(tag))
-            self.setupButtons()
+            self.renderButtons()
         })
         alert.addAction(UIAlertAction(title: "No", style: .default) { action in
         })
@@ -410,7 +412,7 @@ class ViewController: UIViewController {
                 do {
                     try fm.moveItem(at: soundfile, to: newfilename)
                     AppDelegate.groupDefaults().set(toName, forKey: String(tag))
-                    self.setupButtons()
+                    self.renderButtons()
                 } catch {
                     print("\(error)")
                 }
