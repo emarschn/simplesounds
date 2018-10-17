@@ -19,6 +19,8 @@ struct ColorChange {
 class ViewController: UIViewController {
     
     public static var colorChanges: [ColorChange]?
+    public static var editMode: Bool = false
+
 
     public let PER_PAGE: Int = 9
     public let NUM_FEATURED: Int = 3
@@ -43,7 +45,11 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var leftButton: UIButton!
     @IBOutlet weak var rightButton: UIButton!
-
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     
@@ -70,7 +76,7 @@ class ViewController: UIViewController {
         self.title = "\(page + 1)"
         
         var editTitle: String = "Edit"
-        if (isEditing) {
+        if (ViewController.editMode) {
             editTitle = "End Edit"
         }
         let rightButtonItem = UIBarButtonItem.init(
@@ -138,7 +144,7 @@ class ViewController: UIViewController {
             
             resetButton(but: but)
             
-            if !isEditing {
+            if !ViewController.editMode {
                 but.addTarget(self, action: #selector(touchUp), for: .touchUpInside)
                 but.addTarget(self, action: #selector(touchDown), for: .touchDown)
                 
@@ -183,7 +189,7 @@ class ViewController: UIViewController {
     }
     
     @objc func editTapped(sender: UIBarButtonItem) {
-        isEditing = !isEditing
+        ViewController.editMode = !ViewController.editMode
         setupNav()
         renderButtons()
     }
@@ -284,14 +290,12 @@ class ViewController: UIViewController {
             if (v.center.x < 16 && page > 0) {
                 self.move(tag: v.tag, page: page - 1, last: true)
                 self.swipePrev()
-                editTapped(sender: UIBarButtonItem())
                 v.center = startCenter
                 renderButtons()
                 return
             } else if (v.center.x > self.view.frame.size.width - 16) {
                 self.move(tag: v.tag, page: page + 1, last: false)
                 self.swipeNext()
-                editTapped(sender: UIBarButtonItem())
                 v.center = startCenter
                 renderButtons()
                 return
