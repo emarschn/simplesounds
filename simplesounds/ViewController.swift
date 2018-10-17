@@ -10,9 +10,19 @@ import AudioToolbox
 import AVFoundation
 import UIKit
 
+struct ColorChange {
+    var tag: Int
+    var startColor: CGColor
+    var endColor: CGColor
+}
+
 class ViewController: UIViewController {
     
-    public static let PER_PAGE: Int = 9
+    public static var colorChanges: [ColorChange]?
+
+    public let PER_PAGE: Int = 9
+    public let NUM_FEATURED: Int = 3
+
     public var page: Int = 0
 
     var player: AVAudioPlayer?
@@ -43,7 +53,7 @@ class ViewController: UIViewController {
         super.viewWillAppear(animated)
         
         self.buts = [button0, button1, button2, button3, button4, button5, button6, button7, button8]
-        var count = 0 + (ViewController.PER_PAGE * page)
+        var count = 0 + (PER_PAGE * page)
         for but in buts {
             but.tag = count
             count = count + 1
@@ -57,6 +67,12 @@ class ViewController: UIViewController {
         setupView()
         setupButtons()
         setupChevrons()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        handleAnimations()
     }
     
     func setupNav() {
@@ -92,20 +108,25 @@ class ViewController: UIViewController {
     }
     
     func setupButtons() {
-        var count = 0 + (ViewController.PER_PAGE * page)
+        var count = 0 + (PER_PAGE * page)
         for but in buts {
             let str = AppDelegate.groupDefaults().string(forKey: String(count)) ?? String(count)
             but.setTitle(str, for: .normal)
-            count = count + 1
             
-            if count < 4 {
-                but.backgroundColor = colorForFeatured()
+            if count < NUM_FEATURED {
+                but.layer.backgroundColor = colorForFeatured().cgColor
             } else {
-                but.backgroundColor = colorForPage(page: page + 1)
+                but.layer.backgroundColor = colorForPage(page: page + 1).cgColor
             }
-            if (count == AppDelegate.highlightTag) {
-                but.backgroundColor = colorForPage(page: page)
+            
+            if let colorChanges = ViewController.colorChanges {
+                for colorChange in colorChanges {
+                    if (count == colorChange.tag) {
+                        but.layer.backgroundColor = colorChange.startColor
+                    }
+                }
             }
+            
             but.setTitleColor(UIColor.white, for: .normal)
             
             resetButton(but: but)
@@ -130,6 +151,26 @@ class ViewController: UIViewController {
                 but.addGestureRecognizer(tapGesture)
                 
                 but.shake()
+            }
+            
+            count = count + 1
+        }
+    }
+    
+    func handleAnimations() {
+        if let colorChanges = ViewController.colorChanges {
+            for colorChange in colorChanges {
+            for but in buts {
+                if (but.tag == colorChange.tag) {
+                    but.layer.backgroundColor = colorChange.startColor
+                    UIView.animate(withDuration: 0.5, delay: 0.1, options: .curveEaseInOut, animations: {
+                        but.layer.backgroundColor = colorChange.endColor
+                    }) { (finished) in
+                        ViewController.colorChanges = nil
+                    }
+                    break;
+                }
+            }
             }
         }
     }
@@ -218,11 +259,22 @@ class ViewController: UIViewController {
             impact.impactOccurred()
         }
         if gesture.state == .changed {
-            self.view.bringSubview(toFront: v)
             let translation = gesture.translation(in: self.view)
             v.center = CGPoint(x: v.center.x + translation.x, y: v.center.y + translation.y)
             gesture.setTranslation(CGPoint.zero, in: self.view)
             //print("\(v.center)")
+            v.layer.zPosition = 999
+            for but in buts {
+                if v.tag != but.tag {
+                    let vcvt = cvtFrame(v: v).insetBy(dx: 20, dy: 20)
+                    let bcvt = cvtFrame(v: but).insetBy(dx: 20, dy: 20)
+                    if vcvt.intersects(bcvt) {
+                        but.layer.zPosition = 0
+                    } else {
+                        but.layer.zPosition = 999
+                    }
+                }
+            }
         }
         if gesture.state == .ended {
             let translation = gesture.translation(in: self.view)
@@ -231,12 +283,14 @@ class ViewController: UIViewController {
                 self.move(tag: v.tag, page: page - 1, last: true)
                 self.swipePrev()
                 editTapped(sender: UIBarButtonItem())
+                v.center = startCenter
                 setupButtons()
                 return
             } else if (v.center.x > self.view.frame.size.width - 16) {
                 self.move(tag: v.tag, page: page + 1, last: false)
                 self.swipeNext()
                 editTapped(sender: UIBarButtonItem())
+                v.center = startCenter
                 setupButtons()
                 return
             }
@@ -251,8 +305,23 @@ class ViewController: UIViewController {
                         let vstr = AppDelegate.groupDefaults().string(forKey: String(v.tag)) ?? String(v.tag)
                         let butstr = AppDelegate.groupDefaults().string(forKey: String(but.tag)) ?? String(but.tag)
 
+                        ViewController.colorChanges = []
                         AppDelegate.groupDefaults().set(vstr, forKey: String(but.tag))
                         AppDelegate.groupDefaults().set(butstr, forKey: String(v.tag))
+                        
+                        if (page == 0) {
+                            if (but.tag < NUM_FEATURED && v.tag > NUM_FEATURED) {
+                                let colorChange = ColorChange(tag: but.tag, startColor: v.layer.backgroundColor!, endColor: colorForFeatured().cgColor)
+                                ViewController.colorChanges?.append(colorChange)
+                                let colorChange2 = ColorChange(tag: v.tag, startColor: but.layer.backgroundColor!, endColor: colorForPage(page: page + 1).cgColor)
+                                ViewController.colorChanges?.append(colorChange2)
+                            } else if (v.tag < NUM_FEATURED && but.tag > NUM_FEATURED) {
+                                let colorChange = ColorChange(tag: but.tag, startColor: v.layer.backgroundColor!, endColor: colorForPage(page: page + 1).cgColor)
+                                ViewController.colorChanges?.append(colorChange)
+                                let colorChange2 = ColorChange(tag: v.tag, startColor: but.layer.backgroundColor!, endColor: colorForFeatured().cgColor)
+                                ViewController.colorChanges?.append(colorChange2)
+                            }
+                        }
                         
                         moved = true
                         break
@@ -262,6 +331,7 @@ class ViewController: UIViewController {
             }
             v.center = startCenter
             setupButtons()
+            handleAnimations()
             if (moved) {
                 impact.impactOccurred()
             }
@@ -287,7 +357,9 @@ class ViewController: UIViewController {
         let toStr = AppDelegate.groupDefaults().string(forKey: replaceTag) ?? replaceTag
         AppDelegate.groupDefaults().set(fromStr, forKey: replaceTag)
         AppDelegate.groupDefaults().set(toStr, forKey: String(tag))
-        AppDelegate.highlightTag = tag
+        
+        let colorChange = ColorChange(tag: Int(replaceTag)!, startColor: colorForPage(page: page).cgColor, endColor: colorForPage(page: page + 1).cgColor)
+        ViewController.colorChanges = [colorChange]
     }
     
     func delete(tag: Int) {

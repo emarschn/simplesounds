@@ -11,9 +11,7 @@ import AVFoundation
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    public static var highlightTag: Int = -1
-
+    
     var window: UIWindow?
     
     static func groupDefaults() -> UserDefaults {
